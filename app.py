@@ -140,32 +140,33 @@ if df is not None:
         # ----------------------------------
 
         # Center the box using columns
-left_col, center_col, right_col = st.columns([1, 2, 1])
+        st.subheader("🧮 Confusion Matrix")
+        left_col, center_col, right_col = st.columns([1, 2, 1])
 
-with center_col:
-    with st.container(border=True):
-        sns.set_theme(style="dark")
+        with center_col:
+            with st.container(border=True):
+                sns.set_theme(style="dark")
 
-        cm = confusion_matrix(y, y_pred)
+                cm = confusion_matrix(y, y_pred)
 
-        fig, ax = plt.subplots(figsize=(3.2, 2.6))
+                fig, ax = plt.subplots(figsize=(3.2, 2.6))
 
-        sns.heatmap(
-            cm,
-            annot=True,
-            fmt="d",
-            cmap="mako",
-            cbar=True,                 # ✅ SHOW COLOR METER
-            cbar_kws={"shrink": 0.7},  # ✅ MAKE METER SMALL
-            linewidths=0.5,
-            linecolor="gray",
-            xticklabels=["No Disease (0)", "Disease (1)"],
-            yticklabels=["No Disease (0)", "Disease (1)"],
-            ax=ax
-        )
+                sns.heatmap(
+                    cm,
+                    annot=True,
+                    fmt="d",
+                    cmap="mako",
+                    cbar=True,                 # ✅ SHOW COLOR METER
+                    cbar_kws={"shrink": 0.7},  # ✅ MAKE METER SMALL
+                    linewidths=0.5,
+                    linecolor="gray",
+                    xticklabels=["No-Disease (0)", "Disease (1)"],
+                    yticklabels=["No-Disease (0)", "Disease (1)"],
+                    ax=ax
+                )
 
-        ax.set_xlabel("Predicted", fontsize=9)
-        ax.set_ylabel("Actual", fontsize=9)
-        ax.tick_params(axis='both', labelsize=8)
+                ax.set_xlabel("Predicted", fontsize=9)
+                ax.set_ylabel("Actual", fontsize=9)
+                ax.tick_params(axis='both', labelsize=8)
 
-        st.pyplot(fig, use_container_width=False)
+                st.pyplot(fig, use_container_width=False)
