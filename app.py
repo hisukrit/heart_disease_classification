@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import joblib
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from sklearn.metrics import (
     accuracy_score,
@@ -27,24 +29,6 @@ st.markdown(
 )
 
 st.divider()
-
-# ----------------------------------
-# Model Selection
-# ----------------------------------
-model_map = {
-    "Logistic Regression": "model/logistic_regression.pkl",
-    "Decision Tree": "model/decision_tree.pkl",
-    "KNN": "model/knn.pkl",
-    "Naive Bayes": "model/naive_bayes.pkl",
-    "Random Forest": "model/random_forest.pkl",
-    "XGBoost": "model/xgboost.pkl"
-}
-
-st.subheader("🔧 Model Selection")
-selected_model = st.selectbox(
-    "Choose a Machine Learning Model",
-    list(model_map.keys())
-)
 
 # ----------------------------------
 # Dataset Selection
@@ -81,6 +65,27 @@ elif dataset_option == "Upload your own CSV file":
     )
     if uploaded_file:
         df = pd.read_csv(uploaded_file)
+
+st.divider()
+
+# ----------------------------------
+# Model Selection
+# ----------------------------------
+model_map = {
+    "Logistic Regression": "model/logistic_regression.pkl",
+    "Decision Tree": "model/decision_tree.pkl",
+    "KNN": "model/knn.pkl",
+    "Naive Bayes": "model/naive_bayes.pkl",
+    "Random Forest": "model/random_forest.pkl",
+    "XGBoost": "model/xgboost.pkl"
+}
+
+st.subheader("🔧 Model Selection")
+selected_model = st.selectbox(
+    "Choose a Machine Learning Model",
+    list(model_map.keys())
+)
+
 
 # ----------------------------------
 # Validation
@@ -133,14 +138,34 @@ if df is not None:
         # ----------------------------------
         # Simple Confusion Matrix
         # ----------------------------------
-        st.subheader("🧮 Confusion Matrix")
+
+        # Center the box using columns
+left_col, center_col, right_col = st.columns([1, 2, 1])
+
+with center_col:
+    with st.container(border=True):
+        sns.set_theme(style="dark")
 
         cm = confusion_matrix(y, y_pred)
 
-        cm_df = pd.DataFrame(
+        fig, ax = plt.subplots(figsize=(3.2, 2.6))
+
+        sns.heatmap(
             cm,
-            index=["Actual: No Disease (0)", "Actual: Disease (1)"],
-            columns=["Predicted: No Disease (0)", "Predicted: Disease (1)"]
+            annot=True,
+            fmt="d",
+            cmap="mako",
+            cbar=True,                 # ✅ SHOW COLOR METER
+            cbar_kws={"shrink": 0.7},  # ✅ MAKE METER SMALL
+            linewidths=0.5,
+            linecolor="gray",
+            xticklabels=["No Disease (0)", "Disease (1)"],
+            yticklabels=["No Disease (0)", "Disease (1)"],
+            ax=ax
         )
 
-        st.table(cm_df)
+        ax.set_xlabel("Predicted", fontsize=9)
+        ax.set_ylabel("Actual", fontsize=9)
+        ax.tick_params(axis='both', labelsize=8)
+
+        st.pyplot(fig, use_container_width=False)
