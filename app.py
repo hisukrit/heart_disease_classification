@@ -2,8 +2,6 @@ import streamlit as st
 import pandas as pd
 import joblib
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 from sklearn.metrics import (
     accuracy_score,
@@ -23,15 +21,8 @@ st.set_page_config(
     layout="wide"
 )
 
-# ----------------------------------
-# Header
-# ----------------------------------
 st.markdown(
     "<h1 style='text-align: center;'>❤️ Heart Disease Classification Dashboard</h1>",
-    unsafe_allow_html=True
-)
-st.markdown(
-    "<p style='text-align: center;'>Upload test data, select a model, and evaluate performance</p>",
     unsafe_allow_html=True
 )
 
@@ -49,26 +40,54 @@ model_map = {
     "XGBoost": "model/xgboost.pkl"
 }
 
-st.subheader("🔧 Model Configuration")
+st.subheader("🔧 Model Selection")
 selected_model = st.selectbox(
-    "Select Machine Learning Model",
+    "Choose a Machine Learning Model",
     list(model_map.keys())
 )
 
 # ----------------------------------
-# Upload CSV
+# Dataset Selection
 # ----------------------------------
-st.subheader("📂 Upload Test Dataset")
-uploaded_file = st.file_uploader(
-    "Upload CSV file (must include 'target' column)",
-    type=["csv"]
+st.subheader("📂 Dataset Selection")
+
+dataset_option = st.radio(
+    "Select test data source:",
+    ("Use a sample test dataset bundled with the app", "Upload your own CSV file")
 )
 
-if uploaded_file:
-    df = pd.read_csv(uploaded_file)
+# ----------------------------------
+# Load Dataset
+# ----------------------------------
+df = None
 
+if dataset_option == "Use a sample test dataset bundled with the app":
+    df = pd.read_csv("data/heart_disease_sample_data.csv")
+    st.info("Using sample test dataset bundled with the app.")
+
+ # Download link for test dataset
+    with open("data/heart_disease_sample_data.csv", "rb") as file:
+        st.download_button(
+            label="⬇️ Download sample test dataset (heart_disease_sample_data.csv)",
+            data=file,
+            file_name="heart_disease_sample_data.csv",
+            mime="text/csv"
+        )
+
+elif dataset_option == "Upload your own CSV file":
+    uploaded_file = st.file_uploader(
+        "Upload CSV file (must include 'target' column)",
+        type=["csv"]
+    )
+    if uploaded_file:
+        df = pd.read_csv(uploaded_file)
+
+# ----------------------------------
+# Validation
+# ----------------------------------
+if df is not None:
     if "target" not in df.columns:
-        st.error("Uploaded CSV must contain a 'target' column.")
+        st.error("Dataset must contain a 'target' column.")
     else:
         X = df.drop("target", axis=1)
         y = df["target"]
@@ -95,9 +114,9 @@ if uploaded_file:
         st.divider()
 
         # ----------------------------------
-        # Metric Cards
+        # Metrics Display
         # ----------------------------------
-        st.subheader("📊 Model Performance Metrics")
+        st.subheader("📊 Evaluation Metrics")
 
         col1, col2, col3 = st.columns(3)
         col4, col5, col6 = st.columns(3)
@@ -111,17 +130,17 @@ if uploaded_file:
 
         st.divider()
 
-     # ----------------------------------
-    # Confusion Matrix
-    # ----------------------------------
-    st.subheader("🧮 Confusion Matrix")
+        # ----------------------------------
+        # Simple Confusion Matrix
+        # ----------------------------------
+        st.subheader("🧮 Confusion Matrix")
 
-    cm = confusion_matrix(y, y_pred)
+        cm = confusion_matrix(y, y_pred)
 
-    cm_df = pd.DataFrame(
-        cm,
-        index=["Actual: No Disease (0)", "Actual: Disease (1)"],
-        columns=["Predicted: No Disease (0)", "Predicted: Disease (1)"]
-    )
+        cm_df = pd.DataFrame(
+            cm,
+            index=["Actual: No Disease (0)", "Actual: Disease (1)"],
+            columns=["Predicted: No Disease (0)", "Predicted: Disease (1)"]
+        )
 
-    st.table(cm_df)
+        st.table(cm_df)

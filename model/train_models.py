@@ -22,7 +22,7 @@ import os
 # -------------------------------
 # Load Dataset 
 # -------------------------------
-df = pd.read_csv("../data/heart.csv")
+df = pd.read_csv("../data/heart_dataset_kaggle.csv")
 
 X = df.drop("target", axis=1)
 y = df["target"]
